@@ -3,6 +3,7 @@ const app = express()
 
 //set the view engine to ejs for the to do app 
 app.set('view engine','ejs');
+app.use(express.static("public"));
 
 
 //-------------------Home Get Request ---------------------//
