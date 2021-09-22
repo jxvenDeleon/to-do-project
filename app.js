@@ -1,5 +1,7 @@
 const express = require('express');
-const app = express()
+const app = express();
+const mongoose = require('mongoose');
+
 
 //----- Code to allow use of body parser in req.body"
 app.use(express.urlencoded({extended: true}));
@@ -9,6 +11,39 @@ app.use(express.json());
 app.set('view engine','ejs');
 app.use(express.static("public"));
 
+mongoose.connect('mongodb://localhost:27017/todolistDB');
+
+//---------database code ---------//
+
+const itemsSchema = {
+    name: String
+};
+
+const Item = mongoose.model("Item", itemsSchema);
+
+//--default items to add to database -//
+/*
+const task1 = new Item ({
+    name: "Welcome To Your To Do List!"
+})
+
+const task2 = new Item ({
+    name: "Hit the + button to add a new item!"
+})
+
+const task3 = new Item ({
+    name: "Check the box to delete an item!"
+})
+
+const defaultItems= [task1, task2, task3];
+Item.insertMany(defaultItems, (err)=>{
+    if(err){
+        console.log(err);
+    }else{
+        console.log("Success!");
+    }
+});
+*/
 
 
 // -- random logic 
@@ -24,9 +59,16 @@ today = mm + '/' + dd + '/' + yyyy;
 
 //-------------------Home Get Request ---------------------//
 app.get('/', (req,res)=>{
-    
-    res.render('index', {todaysDate: today});
 
+    Item.find({}, (err,foundItems)=>{
+        if (err){
+            console.log(err);
+        }
+        console.log(foundItems);
+        //console.log("funciton succesS")
+        res.render('index', {todaysDate: today, newListItems: foundItems});
+    });
+    
 });
 
 app.post('/', (req,res)=>{
