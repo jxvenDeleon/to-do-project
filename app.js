@@ -22,7 +22,7 @@ const itemsSchema = {
 const Item = mongoose.model("Item", itemsSchema);
 
 //--default items to add to database -//
-/*
+
 const task1 = new Item ({
     name: "Welcome To Your To Do List!"
 })
@@ -36,14 +36,7 @@ const task3 = new Item ({
 })
 
 const defaultItems= [task1, task2, task3];
-Item.insertMany(defaultItems, (err)=>{
-    if(err){
-        console.log(err);
-    }else{
-        console.log("Success!");
-    }
-});
-*/
+
 
 
 // -- random logic 
@@ -60,26 +53,62 @@ today = mm + '/' + dd + '/' + yyyy;
 //-------------------Home Get Request ---------------------//
 app.get('/', (req,res)=>{
 
+
+    //look for all the items in the databse, will return an array 
     Item.find({}, (err,foundItems)=>{
         if (err){
             console.log(err);
         }
-        console.log(foundItems);
+        //console.log(foundItems);
+
+        if(foundItems.length === 0){
+            Item.insertMany(defaultItems, (err)=>{
+                if(err){
+                    console.log(err);
+                }else{
+                    console.log("Success!");
+                }
+            });     
+            res.redirect('/');
+        }
         //console.log("funciton succesS")
         res.render('index', {todaysDate: today, newListItems: foundItems});
     });
     
 });
 
+
+//---------------------- home post requests-----------------//
+
 app.post('/', (req,res)=>{
 
-    var newItem = req.body.newItem
-    console.log(newItem)
-    
+    const newItem = req.body.newItem;
 
-    res.redirect('index')
+    const newTask = new Item({
+        name:newItem
+    });
+
+    
+    newTask.save();
+    res.redirect('/')
+  
 });
 
+
+app.post('/delete',(req,res)=>{
+    console.log(req.body);
+    const checkedItemID = req.body.checkbox;
+
+    Item.findByIdAndRemove(checkedItemID, (err)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log("successfully removed");
+        }
+    })
+
+    res.redirect('/');
+});
 
 
 
